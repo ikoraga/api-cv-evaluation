@@ -2,9 +2,13 @@ require("dotenv").config();
 const amqp = require("amqplib");
 const path = require("path");
 const { parsePDF } = require("./services/cvParserService");
-const { askLLMAboutCV, askLLMAboutProject } = require("./services/llmService");
+const {
+  askLLMAboutCV,
+  askLLMAboutProject,
+  askLLMFinalSummary,
+} = require("./services/llmService");
 const { PrismaClient } = require("@prisma/client");
-const { calculateScore } = require("./services/scoreService");
+const { calculateOverallScore } = require("./services/scoreService");
 
 const prisma = new PrismaClient();
 const QUEUE = "evaluation";
@@ -62,11 +66,15 @@ const QUEUE = "evaluation";
         const projectResult = await askLLMAboutProject(reportText);
 
         // Hitung skor
-        const evaluatedScores = [cvResult.score, projectResult.score];
-        const overallScore = calculateScore(evaluatedScores);
-        console.log("Evaluated scores:", evaluatedScores);
+        const overallScore = calculateOverallScore(
+          cvResult.score,
+          projectResult.score
+        );
+        console.log("Evaluated scores:", overallScore);
 
-        // Simpan hasil ke DB
+        const finalSummary = await askLLMFinalSummary(cvResult, projectResult);
+        console.log("Final summary:", finalSummary);
+
         const updated = await prisma.evaluationResult.update({
           where: { jobId: job.jobId },
           data: {
@@ -75,11 +83,7 @@ const QUEUE = "evaluation";
             projectFeedback: projectResult.feedback,
             cvMatchRate: cvResult.score,
             projectScore: projectResult.score,
-            overallSummary: `CV Score: ${cvResult.score.toFixed(
-              1
-            )}%, Project Score: ${projectResult.score.toFixed(
-              1
-            )}%, Overall: ${overallScore.toFixed(1)}%.`,
+            overallSummary: finalSummary,
           },
         });
 

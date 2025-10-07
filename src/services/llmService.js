@@ -204,5 +204,57 @@ ${reportText}
     };
   }
 }
+/**
+ * Tanya LLM untuk membuat overall summary dari hasil CV & Project
+ */
+async function askLLMFinalSummary(cvResult, projectResult) {
+  const prompt = `
+# ROLE / PERSONA
+You are **Iko**, a senior hiring manager evaluating a backend engineer candidate.
+You already have results from the CV and Project evaluations.
 
-module.exports = { askLLMAboutCV, askLLMAboutProject };
+# TASK
+Synthesize both evaluations into a concise final summary.
+- Mention strengths (technical skills, project execution)
+- Highlight improvement areas
+- End with a short hiring recommendation (e.g., good fit, promising, or needs improvement)
+Write naturally in 3–5 sentences.
+
+# INPUT
+CV Evaluation:
+Feedback: ${cvResult.feedback}
+Score: ${cvResult.score}
+
+Project Evaluation:
+Feedback: ${projectResult.feedback}
+Score: ${projectResult.score}
+
+# OUTPUT FORMAT
+Return only plain text (no JSON).
+`;
+
+  try {
+    const response = await client.chat.completions.create({
+      model: process.env.LLM_MODEL_NAME,
+      messages: [
+        {
+          role: "system",
+          content:
+            "You are a senior technical hiring manager who writes concise and balanced evaluation summaries.",
+        },
+        { role: "user", content: prompt },
+      ],
+      temperature: 0.3,
+      max_tokens: 300,
+    });
+
+    const summary = response.choices[0].message.content.trim();
+    console.log("🧠 Final LLM Summary:", summary);
+    return summary;
+  } catch (err) {
+    console.error("❌ Error generating final summary:", err);
+    return "⚠️ Failed to generate final summary due to LLM error.";
+  }
+}
+
+module.exports = { askLLMAboutCV, askLLMAboutProject, askLLMFinalSummary };
