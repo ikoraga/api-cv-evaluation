@@ -20,7 +20,6 @@ function safeJSONParse(str) {
   } catch (err) {
     console.warn("⚠️ JSON parse failed:", err.message);
   }
-  // fallback jika tidak valid JSON
   return { feedback: str.trim(), overallScore: 0 };
 }
 
@@ -59,7 +58,7 @@ Example Output:
 
 # THINKING (CHAIN OF THOUGHT)
 - Identify strong and weak areas from the CV.
-- Evaluate each dimension numerically (0–100).
+- Evaluate each dimension numerically (0-100).
 - Average the scores as overallScore.
 - Keep feedback professional and concise.
 
@@ -67,11 +66,11 @@ Example Output:
 Return strictly valid JSON with this structure:
 {
   "feedback": "string",
-  "technicalCompetence": number (0–100),
-  "problemSolving": number (0–100),
-  "communication": number (0–100),
-  "relevance": number (0–100),
-  "overallScore": number (0–100)
+  "technicalCompetence": number (0-100),
+  "problemSolving": number (0-100),
+  "communication": number (0-100),
+  "relevance": number (0-100),
+  "overallScore": number (0100)
 }
 
 # CV CONTENT
@@ -94,10 +93,8 @@ ${cvText}
     });
 
     const content = response.choices[0].message.content.trim();
-    console.log("🧠 Raw LLM response (CV):", content);
 
     const parsed = safeJSONParse(content);
-    console.log("✅ Parsed CV result:", parsed);
 
     return {
       feedback: parsed.feedback || content,
@@ -107,7 +104,6 @@ ${cvText}
           : 0,
     };
   } catch (err) {
-    console.error("❌ Error from OpenAI (CV):", err);
     return { feedback: "⚠️ Failed to evaluate CV due to LLM error.", score: 0 };
   }
 }

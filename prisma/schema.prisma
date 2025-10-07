@@ -14,15 +14,26 @@ datasource db {
 }
 
 model EvaluationResult {
-  id              String   @id @default(cuid())
-  jobId           String   @unique
+  id              String             @id @default(cuid())
+  jobId           String             @unique
   cvPath          String
   reportPath      String
-  status          String   @default("queued")
-  cvMatchRate     Float?
-  cvFeedback      String?  @db.Text
-  projectScore    Float?
-  projectFeedback String?  @db.Text
-  overallSummary  String?  @db.Text
-  createdAt       DateTime @default(now())
+  status          EvaluationStatus   @default(queued)
+  cvMatchRate     Float?             @default(0)
+  cvFeedback      String?            @db.Text
+  projectScore    Float?             @default(0)
+  projectFeedback String?            @db.Text
+  overallSummary  String?            @db.Text
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+
+  @@index([status, createdAt])
 }
+
+enum EvaluationStatus {
+  queued
+  processing
+  completed
+  failed
+}
+
