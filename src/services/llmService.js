@@ -14,7 +14,7 @@ function safeJSONParse(str) {
       return JSON.parse(str.slice(start, end + 1));
     }
   } catch (err) {
-    console.warn("⚠️ JSON parse failed:", err.message);
+    console.warn("JSON parse failed:", err.message);
   }
   return { feedback: str.trim(), overallScore: 0 };
 }
@@ -96,7 +96,7 @@ ${cvText}
           : 0,
     };
   } catch (err) {
-    return { feedback: "⚠️ Failed to evaluate CV due to LLM error.", score: 0 };
+    return { feedback: "Failed to evaluate CV due to LLM error.", score: 0 };
   }
 }
 
@@ -230,11 +230,11 @@ Return only plain text (no JSON).
     });
 
     const summary = response.choices[0].message.content.trim();
-    console.log("🧠 Final LLM Summary:", summary);
+    console.log("Final LLM Summary:", summary);
     return summary;
   } catch (err) {
-    console.error("❌ Error generating final summary:", err);
-    return "⚠️ Failed to generate final summary due to LLM error.";
+    console.error("Error generating final summary:", err);
+    return "Failed to generate final summary due to LLM error.";
   }
 }
 

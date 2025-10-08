@@ -35,7 +35,6 @@ exports.calculateProjectScore = (scores) => {
 };
 
 exports.calculateOverallScore = (cvScore, projectScore) => {
-  // Misal bobot CV 0.2 (20%), project 0.8 (80%)
   const weighted = cvScore * 0.2 + projectScore * 0.8;
   return parseFloat(weighted.toFixed(2));
 };

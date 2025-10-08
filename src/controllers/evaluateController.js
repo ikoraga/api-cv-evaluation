@@ -7,7 +7,6 @@ exports.evaluate = async (req, res) => {
   try {
     const { cv_id, report_id } = req.body;
 
-    // 🔸 Validasi input
     if (!cv_id || !report_id) {
       return res.status(400).json({
         error: "Missing required fields: cv_id and report_id",
@@ -23,10 +22,6 @@ exports.evaluate = async (req, res) => {
     const cvLocalPath = path.join("public", "uploads", cv_id);
     const reportLocalPath = path.join("public", "uploads", report_id);
 
-    console.log(`📥 New job ${jobId}`);
-    console.log(`   ├── CV: ${cvLocalPath}`);
-    console.log(`   └── Report: ${reportLocalPath}`);
-
     const newJob = await prisma.evaluationResult.create({
       data: {
         jobId,
@@ -38,7 +33,7 @@ exports.evaluate = async (req, res) => {
 
     const channel = getChannel();
     if (!channel) {
-      console.error("❌ RabbitMQ channel not available");
+      console.error("RabbitMQ channel not available");
       await prisma.evaluationResult.update({
         where: { jobId },
         data: { status: "failed" },
@@ -57,14 +52,14 @@ exports.evaluate = async (req, res) => {
       )
     );
 
-    console.log(`📤 Job ${jobId} successfully queued`);
+    console.log(`Job ${jobId} successfully queued`);
 
     return res.status(200).json({
       id: jobId,
       status: "queued",
     });
   } catch (error) {
-    console.error("❌ Error in /evaluate:", error);
+    console.error("Error in /evaluate:", error);
 
     return res.status(500).json({
       error: "Internal server error",

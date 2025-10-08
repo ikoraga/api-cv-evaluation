@@ -25,20 +25,20 @@ const QUEUE = "evaluation";
     const channel = await conn.createChannel();
     await channel.assertQueue(QUEUE);
 
-    console.log("✅ Worker connected to RabbitMQ, waiting for messages...");
+    console.log("Worker connected to RabbitMQ, waiting for messages...");
 
     channel.consume(QUEUE, async (msg) => {
       if (!msg) return;
 
       const job = JSON.parse(msg.content.toString());
-      console.log(`📩 Received job:`, job);
+      console.log(`Received job:`, job);
 
       try {
         await prisma.evaluationResult.update({
           where: { jobId: job.jobId },
           data: { status: "processing" },
         });
-        console.log(`⚙️ Job ${job.jobId} set to processing`);
+        console.log(`Job ${job.jobId} set to processing`);
 
         let cvPath = job.cvPath;
         let reportPath = job.reportPath;
@@ -52,17 +52,17 @@ const QUEUE = "evaluation";
           reportPath = path.join(__dirname, "public", "uploads", reportFile);
         }
 
-        console.log(`📄 Parsing CV from: ${cvPath}`);
+        console.log(`Parsing CV from: ${cvPath}`);
         const cvText = await parsePDF(cvPath);
 
-        console.log(`📑 Parsing Project Report from: ${reportPath}`);
+        console.log(`Parsing Project Report from: ${reportPath}`);
         const reportText = await parsePDF(reportPath);
 
         // Evaluasi pakai LLM
-        console.log(`🤖 Sending CV to LLM for evaluation...`);
+        console.log(`Sending CV to LLM for evaluation...`);
         const cvResult = await askLLMAboutCV(cvText);
 
-        console.log(`🤖 Sending Project Report to LLM for evaluation...`);
+        console.log(`Sending Project Report to LLM for evaluation...`);
         const projectResult = await askLLMAboutProject(reportText);
 
         // Hitung skor
@@ -87,12 +87,12 @@ const QUEUE = "evaluation";
           },
         });
 
-        console.log(`✅ Job ${job.jobId} completed & saved to DB`);
+        console.log(`Job ${job.jobId} completed & saved to DB`);
         console.log(updated);
 
         channel.ack(msg);
       } catch (err) {
-        console.error(`❌ Error processing job ${job.jobId}:`, err);
+        console.error(`Error processing job ${job.jobId}:`, err);
 
         await prisma.evaluationResult.update({
           where: { jobId: job.jobId },
@@ -103,7 +103,7 @@ const QUEUE = "evaluation";
       }
     });
   } catch (err) {
-    console.error("❌ Worker fatal error:", err);
+    console.error("Worker fatal error:", err);
     process.exit(1);
   }
 })();
