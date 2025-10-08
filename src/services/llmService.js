@@ -6,10 +6,6 @@ const client = new OpenAI({
   baseURL: process.env.LLM_BASE_URL,
 });
 
-/**
- * Helper: Safe JSON parser
- * Menghindari crash kalau LLM tidak mengembalikan JSON valid
- */
 function safeJSONParse(str) {
   try {
     const start = str.indexOf("{");
@@ -23,10 +19,6 @@ function safeJSONParse(str) {
   return { feedback: str.trim(), overallScore: 0 };
 }
 
-/**
- * Tanya LLM untuk evaluasi CV
- * Persona: Iko sebagai recruiter AI/backend
- */
 async function askLLMAboutCV(cvText) {
   const cvPrompt = `
 # ROLE / PERSONA
@@ -108,10 +100,6 @@ ${cvText}
   }
 }
 
-/**
- * Tanya LLM untuk evaluasi Project Report
- * Persona: Iko sebagai AI researcher / reviewer
- */
 async function askLLMAboutProject(reportText) {
   const projectPrompt = `
 # ROLE / PERSONA
@@ -200,9 +188,6 @@ ${reportText}
     };
   }
 }
-/**
- * Tanya LLM untuk membuat overall summary dari hasil CV & Project
- */
 async function askLLMFinalSummary(cvResult, projectResult) {
   const prompt = `
 # ROLE / PERSONA

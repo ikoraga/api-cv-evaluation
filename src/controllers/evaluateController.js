@@ -14,15 +14,12 @@ exports.evaluate = async (req, res) => {
       });
     }
 
-    // 🔹 Generate unique jobId
     const jobId = Date.now().toString();
     const BASE_URL = process.env.BASE_URL || "http://localhost:3000";
 
-    // 🔹 Simpan URL untuk akses publik
     const cvUrl = `${BASE_URL}/uploads/${cv_id}`;
     const reportUrl = `${BASE_URL}/uploads/${report_id}`;
 
-    // 🔹 Simpan path lokal untuk worker
     const cvLocalPath = path.join("public", "uploads", cv_id);
     const reportLocalPath = path.join("public", "uploads", report_id);
 
@@ -30,7 +27,6 @@ exports.evaluate = async (req, res) => {
     console.log(`   ├── CV: ${cvLocalPath}`);
     console.log(`   └── Report: ${reportLocalPath}`);
 
-    // 🔹 Simpan job ke database
     const newJob = await prisma.evaluationResult.create({
       data: {
         jobId,
@@ -40,7 +36,6 @@ exports.evaluate = async (req, res) => {
       },
     });
 
-    // 🔹 Kirim job ke RabbitMQ
     const channel = getChannel();
     if (!channel) {
       console.error("❌ RabbitMQ channel not available");
@@ -64,7 +59,6 @@ exports.evaluate = async (req, res) => {
 
     console.log(`📤 Job ${jobId} successfully queued`);
 
-    // 🔹 Respon ke client
     return res.status(200).json({
       id: jobId,
       status: "queued",
