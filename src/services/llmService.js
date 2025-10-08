@@ -62,7 +62,7 @@ Return strictly valid JSON with this structure:
   "problemSolving": number (0-100),
   "communication": number (0-100),
   "relevance": number (0-100),
-  "overallScore": number (0100)
+  "overallScore": number (0-100)
 }
 
 # CV CONTENT
@@ -85,15 +85,24 @@ ${cvText}
     });
 
     const content = response.choices[0].message.content.trim();
-
     const parsed = safeJSONParse(content);
+
+    // ✅ Perbaikan skoring math sesuai rubric:
+    // LLM memberi 0–100 → ubah ke 1–5 → lalu ke 0–1 (CV Match Rate)
+    let normalizedScore = 0;
+    if (
+      typeof parsed.overallScore === "number" &&
+      !isNaN(parsed.overallScore)
+    ) {
+      const fiveScale = (parsed.overallScore / 100) * 5; // 0–100 ke 1–5
+      normalizedScore = parseFloat(((fiveScale - 1) / 4).toFixed(2)); // 1–5 ke 0–1
+      if (normalizedScore < 0) normalizedScore = 0;
+      if (normalizedScore > 1) normalizedScore = 1;
+    }
 
     return {
       feedback: parsed.feedback || content,
-      score:
-        typeof parsed.overallScore === "number" && !isNaN(parsed.overallScore)
-          ? parsed.overallScore
-          : 0,
+      score: normalizedScore, // 0–1 sesuai rubric CV
     };
   } catch (err) {
     return { feedback: "Failed to evaluate CV due to LLM error.", score: 0 };
@@ -173,21 +182,31 @@ ${reportText}
     const parsed = safeJSONParse(content);
     console.log("✅ Parsed Project result:", parsed);
 
+    // ✅ Perbaikan skoring math sesuai rubric:
+    // LLM memberi 0–100 → ubah ke 1–5 (karena rubric project pakai skala 1–5)
+    let scaledScore = 0;
+    if (
+      typeof parsed.overallScore === "number" &&
+      !isNaN(parsed.overallScore)
+    ) {
+      scaledScore = parseFloat(((parsed.overallScore / 100) * 5).toFixed(2));
+      if (scaledScore < 1) scaledScore = 1;
+      if (scaledScore > 5) scaledScore = 5;
+    }
+
     return {
       feedback: parsed.feedback || content,
-      score:
-        typeof parsed.overallScore === "number" && !isNaN(parsed.overallScore)
-          ? parsed.overallScore
-          : 0,
+      score: scaledScore, // 1–5 sesuai rubric Project
     };
   } catch (err) {
     console.error("❌ Error from OpenAI (Project):", err);
     return {
       feedback: "⚠️ Failed to evaluate Project Report due to LLM error.",
-      score: 0,
+      score: 1, // default minimal
     };
   }
 }
+
 async function askLLMFinalSummary(cvResult, projectResult) {
   const prompt = `
 # ROLE / PERSONA
