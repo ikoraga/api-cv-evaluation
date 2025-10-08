@@ -87,22 +87,20 @@ ${cvText}
     const content = response.choices[0].message.content.trim();
     const parsed = safeJSONParse(content);
 
-    // ✅ Perbaikan skoring math sesuai rubric:
-    // LLM memberi 0–100 → ubah ke 1–5 → lalu ke 0–1 (CV Match Rate)
     let normalizedScore = 0;
     if (
       typeof parsed.overallScore === "number" &&
       !isNaN(parsed.overallScore)
     ) {
-      const fiveScale = (parsed.overallScore / 100) * 5; // 0–100 ke 1–5
-      normalizedScore = parseFloat(((fiveScale - 1) / 4).toFixed(2)); // 1–5 ke 0–1
+      const fiveScale = (parsed.overallScore / 100) * 5;
+      normalizedScore = parseFloat(((fiveScale - 1) / 4).toFixed(2));
       if (normalizedScore < 0) normalizedScore = 0;
       if (normalizedScore > 1) normalizedScore = 1;
     }
 
     return {
       feedback: parsed.feedback || content,
-      score: normalizedScore, // 0–1 sesuai rubric CV
+      score: normalizedScore,
     };
   } catch (err) {
     return { feedback: "Failed to evaluate CV due to LLM error.", score: 0 };
@@ -177,13 +175,11 @@ ${reportText}
     });
 
     const content = response.choices[0].message.content.trim();
-    console.log("🧠 Raw LLM response (Project):", content);
+    console.log("Raw LLM response (Project):", content);
 
     const parsed = safeJSONParse(content);
-    console.log("✅ Parsed Project result:", parsed);
+    console.log("Parsed Project result:", parsed);
 
-    // ✅ Perbaikan skoring math sesuai rubric:
-    // LLM memberi 0–100 → ubah ke 1–5 (karena rubric project pakai skala 1–5)
     let scaledScore = 0;
     if (
       typeof parsed.overallScore === "number" &&
@@ -196,13 +192,13 @@ ${reportText}
 
     return {
       feedback: parsed.feedback || content,
-      score: scaledScore, // 1–5 sesuai rubric Project
+      score: scaledScore,
     };
   } catch (err) {
-    console.error("❌ Error from OpenAI (Project):", err);
+    console.error(" Error from OpenAI (Project):", err);
     return {
-      feedback: "⚠️ Failed to evaluate Project Report due to LLM error.",
-      score: 1, // default minimal
+      feedback: "Failed to evaluate Project Report due to LLM error.",
+      score: 1,
     };
   }
 }

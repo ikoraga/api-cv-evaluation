@@ -58,14 +58,12 @@ const QUEUE = "evaluation";
         console.log(`Parsing Project Report from: ${reportPath}`);
         const reportText = await parsePDF(reportPath);
 
-        // Evaluasi pakai LLM
         console.log(`Sending CV to LLM for evaluation...`);
         const cvResult = await askLLMAboutCV(cvText);
 
         console.log(`Sending Project Report to LLM for evaluation...`);
         const projectResult = await askLLMAboutProject(reportText);
 
-        // Hitung skor
         const overallScore = calculateOverallScore(
           cvResult.score,
           projectResult.score

@@ -1,13 +1,3 @@
-// scoring.js
-
-/**
- * Hitung CV Match Rate (1–5 → 0–1)
- * Bobot:
- * - Technical (0.4)
- * - Experience (0.25)
- * - Achievements (0.2)
- * - Cultural Fit (0.15)
- */
 exports.calculateCvScore = (scores) => {
   const weights = {
     technical: 0.4,
@@ -22,21 +12,11 @@ exports.calculateCvScore = (scores) => {
     (scores.achievements || 0) * weights.achievements +
     (scores.cultural || 0) * weights.cultural;
 
-  // Konversi dari skala 1–5 ke 0–1
   const normalized = total / 5;
 
-  return parseFloat(normalized.toFixed(2)); // hasil: 0–1
+  return parseFloat(normalized.toFixed(2));
 };
 
-/**
- * Hitung Project Score (1–5)
- * Bobot:
- * - Correctness (0.3)
- * - Code Quality (0.25)
- * - Resilience (0.2)
- * - Documentation (0.15)
- * - Creativity (0.1)
- */
 exports.calculateProjectScore = (scores) => {
   const weights = {
     correctness: 0.3,

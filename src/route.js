@@ -12,15 +12,8 @@ router.post(
     { name: "cv", maxCount: 1 },
     { name: "report", maxCount: 1 },
   ]),
-  // (req, res, next) => {
-  //   console.log("req.files:", req.files);
-  //   console.log("req.body:", req.body);
-  //   next();
-  // },
   uploadController.uploadFiles
 );
-// console.log("req.files:", req.files);
-// console.log("req.body:", req.body);
 
 router.post("/evaluate", evaluateController.evaluate);
 router.get("/result/:id", resultController.getResult);
